@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+/**
+编写程序（编程语言不限）用自己的昵称 + nonce，不断进行 sha256 Hash 运算：
+直到满足 4 个 0 开头的哈希值，打印出花费的时间。
+再次运算直到满足 5 个 0 开头的哈希值，打印出花费的时间。
+*/
+
 // 传入长度为32字节数组
 func generateHash(data []byte) [32]byte {
 	return sha256.Sum256(data)
@@ -16,10 +22,10 @@ func generateHash(data []byte) [32]byte {
 // 生成随机数
 func generateNonce() []byte {
 	rand.Seed(time.Now().UnixNano())
-	randomNum := rand.Intn(100000)
+	data := make([]byte, 32) // 生成32字节的随机数据
+	rand.Read(data)
 	//ace 别名
-	combinedStr := fmt.Sprintf("%s%d", "ace", randomNum)
-	//fmt.Printf("计算得到废弃的hash：%s \n", combinedStr)
+	combinedStr := fmt.Sprintf("%s%d", "ace", data)
 	return []byte(combinedStr)
 }
 
@@ -42,14 +48,8 @@ func findHashWithZeros(prefixLen int) ([32]byte, int64) {
 		if hasPrefixOfZeros(hash, prefixLen) {
 			elapsedTime := time.Since(startTime).Milliseconds()
 			return hash, elapsedTime
-		} else {
-			fmt.Printf("计算得到废弃的hash：%s \n", hex.EncodeToString(hash[:]))
-			break
 		}
 	}
-	str := "Hello, World!"
-
-	return sha256.Sum256([]byte(str)), 23
 }
 
 func main() {
@@ -59,6 +59,7 @@ func main() {
 	for _, length := range prefixLen {
 		hash, elapsedTime := findHashWithZeros(length)
 		hashStr := hex.EncodeToString(hash[:])
-		fmt.Printf("计算得到开头包含 %d 个0的hash: %s, 花费时间: %.3fs \n", length, hashStr, float64(elapsedTime)/1000)
+		fmt.Printf("pow 计算得到开头包含 %d 个0的hash: %s, 花费时间: %.3fs \n", length, hashStr, float64(elapsedTime)/1000)
 	}
+
 }
