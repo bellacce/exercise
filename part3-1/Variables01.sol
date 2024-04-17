@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+//1.Web1.0为 “可读”（read）；
+//2.Web2.0为 “可读+可写”（read+write）；
+//3.Web3.0则是 “可读+可写+拥有”（read+write+own）。
+
 contract Variables {
     // State Variables
 
