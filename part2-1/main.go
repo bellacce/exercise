@@ -16,6 +16,7 @@ func main() {
 	http.HandleFunc("/addTransaction", pkg.AddTransaction)
 	//4.获取所有区块 http://localhost:8080/getAllBlockInfo
 	http.HandleFunc("/getAllBlockInfo", pkg.GetAllBlockInfo)
+	//缺少矿工同时出块
 
 	//添加区块
 	pkg.Blockchain = append(pkg.Blockchain, genesisBlock)
