@@ -9,7 +9,7 @@ contract Bank {
     //定义每个账户
     mapping(address => uint) public balances;
     //定义top3存款人
-    address[3] public top3Depositors;
+    address[3] private top3Depositors;
 
     constructor() {
         owner = msg.sender;
@@ -21,7 +21,7 @@ contract Bank {
     }
 
     // 1.存款方法
-    function deposit() external payable {
+    function deposit() public payable {
         balances[msg.sender] += msg.value;
         if(balances[msg.sender] > balances[top3Depositors[2]]){
             if (balances[msg.sender] >  balances[top3Depositors[0]]) {
@@ -38,10 +38,17 @@ contract Bank {
     }
 
     // 2. 管理员取所有钱
-    function withdraw() public onlyOwner {
+    function withdraw() external onlyOwner {
         uint ubalance = address(this).balance;
         require(ubalance > 0, "No balance to withdraw!");
         payable(owner).transfer(ubalance);
+    }
+
+    //3. 个人取钱
+    function withdraw(uint amount) public  {
+        require(balances[msg.sender] >= amount, "No balance to withdraw!");
+        balances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
     }
 
     function getTop3() external view returns (address[3] memory) {
@@ -49,18 +56,11 @@ contract Bank {
     }
 
     //收钱回调
-    receive() external payable { }
+    receive() external payable {
+        deposit();
+    }
 
     //没有function的方法会调用
     fallback() external payable { }
-
-    function getBalance(address user) public view returns (uint) {
-        return balances[user];
-    }
-
-    // 查询银行所有资产
-    function getTotalBalance() public view returns (uint) {
-        return address(this).balance;
-    }
 
 }
