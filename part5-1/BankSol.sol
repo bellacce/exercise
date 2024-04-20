@@ -21,7 +21,7 @@ contract Bank {
     }
 
     // 1.存款方法
-    function deposit() public virtual  payable {
+    function deposit() public virtual payable {
         balances[msg.sender] += msg.value;
         if(balances[msg.sender] > balances[top3Depositors[2]]){
             if (balances[msg.sender] >  balances[top3Depositors[0]]) {
@@ -45,22 +45,20 @@ contract Bank {
     }
 
     //3. 个人取钱
-    function withdraw(uint amount) public  {
-        require(balances[msg.sender] >= amount, "No balance to withdraw!");
-        balances[msg.sender] -= amount;
-        payable(msg.sender).transfer(amount);
+    function withdraw(address _addr, uint amount) public virtual  onlyOwner{
+        require(balances[_addr] >= amount, "No balance to withdraw!");
+        balances[_addr] -= amount;
+        payable(_addr).transfer(amount);
     }
 
     function getTop3() external view returns (address[3] memory) {
         return top3Depositors;
     }
 
-    //收钱回调
-    receive() external payable {
+    receive() external virtual payable {
         deposit();
     }
 
-    //没有function的方法会调用
     fallback() external payable { }
 
 }
