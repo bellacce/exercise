@@ -25,7 +25,7 @@ contract BaseERC20 {
         name = "BaseERC20";
         symbol = "BERC20";
         decimals = 18;
-        totalSupply = 100000000 * (1e18);
+        totalSupply = 100000000 * (10**18);
 
         balances[msg.sender] = totalSupply;
     }
