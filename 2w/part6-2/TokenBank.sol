@@ -1,51 +1,40 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.6.12 <0.9.0;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import "./BaseERC20.sol";
+contract TokenBank{
 
-contract TokenBank is BaseERC20 {
+    ERC20 public token;
+    mapping(address => uint256) public balanceOf;
 
-    string public constant name = "Multi-Token Contract"; // 代币名称
-    string public constant symbol = "MTC"; // 代币符号
-    uint8 public constant decimals = 18; // 小数位
 
-    uint256 public constant INITIAL_SUPPLY = 100000000 ether; // 数量
+    event Deposit(address indexed _address,uint256 _amount);
+    event Withdraw(address indexed _address,uint256 _amount);
 
-    constructor() {
-        //定义token总数, 给当前合约
-        balances[msg.sender] = INITIAL_SUPPLY;
-        emit Transfer(address(0), msg.sender, INITIAL_SUPPLY);
+    //初始化获取ERC20地址
+    constructor(ERC20 _token){
+        token = _token;
     }
 
-    //1.先授权用户token数量
-    function approve(address _spender, uint256 _value) public override returns (bool success) {
-        require(balances[msg.sender] > _value, "no token to approve !");
-        mapping(address => uint256) storage cusMap = allowances[msg.sender];
-        cusMap[_spender] += _value;
-
-        emit Approval(msg.sender, _spender, _value);
-        return true;
+    //1.存入token
+    function deposit(uint256 _amount) external {
+        //开通bank在ERC20的账户, 授权用户的token(来自于初始化合约的token)，并把一部分token转移到bank地址
+        token.transferFrom(msg.sender, address(this), _amount);
+        //bank记录资金池
+        balanceOf[msg.sender] += _amount;
+        emit Deposit(msg.sender, _amount);
     }
 
-    //2.存入token到银行账户
-    function deposit(address _from, address _to, uint256 _value) public  payable  {
-        require(balances[_from] >= _value, "transfer amount exceeds balance");
-        require(allowances[_from][_to] >= _value, "transfer amount exceeds allowance");
-
-        //存入token
-        balances[_from] -= _value;
-        balances[_to] += _value;
-
-        //减掉授权的金额
-        allowances[_from][_to] -= _value;
-        emit Transfer(_from, _to, _value);
+    //2.获取token
+    function withdraw(uint256  tokenAmount) external{
+        uint256 _amount = balanceOf[msg.sender];
+        require(_amount > tokenAmount, "too many token to withdraw!");
+        balanceOf[msg.sender] = 0;
+        //资金转移
+        token.transfer(msg.sender, tokenAmount);
+        emit Withdraw(msg.sender, tokenAmount);
     }
 
-    //3. 用户可以提取自己的之前存入的 token
-    function withdraw(address _from, address _to, uint256 _value) external {
-        require(balances[_from] >= _value, "no token withdraw !");
-        balances[_from] -= _value;
-        emit Transfer(_from, _to, _value);
-    }
+
 
 }
