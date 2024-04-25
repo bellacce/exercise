@@ -60,10 +60,14 @@ contract NFTMarket is IERC721Receiver {
 		IERC721(nftToken).transferFrom(address(this), msg.sender, tokenId);
 	}
 
-	function tokensReceived(address,uint amount, uint tokenId) external returns (bool){
+	//引用类型，bytes memory，需要传入，值类型 bytes 通用表示
+	function tokensReceived(address _addr, uint, bytes memory tokenId) external returns (bool){
 		//查看是不是通过ERC20的合约购买权限
 		require(msg.sender == token,  "no vaild address to buy!");
-		this.buyNFT(amount, tokenId);
+		uint256 tokenIdNum = abi.decode(tokenId, (uint256));
+
+		//ERC721，授权NFTMarket合约去操作，把NFT转移到接收者名下
+		IERC721(nftToken).transferFrom(address(this), _addr, tokenIdNum);
 		return true;
 	}
 
