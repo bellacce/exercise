@@ -25,25 +25,17 @@ contract CusHookERC20 is ERC20 {
         _mint(msg.sender, 10000000* 10 ** 18);
     }
 
-    //recipient  自定义bank的合约地址
-    function transferWithCallback(address recipient, uint256 amount) external returns (bool) {
+    //recipient  自定义bank的合约地址 或者NFT合约
+    function transferWithCallback(address recipient, uint256 amount, bytes calldata data) external returns (bool) {
         _transfer(msg.sender, recipient, amount);
         emit TransferWithCallback(msg.sender, recipient, amount);
         if (recipient.isContract()) {
-            bool rv = IEC20CallBack(recipient).tokensReceived(msg.sender, amount, 0);
+            bool rv = IEC20CallBack(recipient).tokensReceived(msg.sender, amount, data);
             require(rv, "No tokensReceived");
         }
         return true;
     }
 
-    //recipient  自定义NFT的合约地址
-    function transferWithCallback(address recipient, uint256 amount, uint tokenId) external returns (bool) {
-        emit TransferWithCallback(msg.sender, recipient, amount);
-        if (recipient.isContract()) {
-            bool rv = IEC20CallBack(recipient).tokensReceived(msg.sender, amount, tokenId);
-            require(rv, "No tokensReceived");
-        }
-        return true;
-    }
+
 
 }
